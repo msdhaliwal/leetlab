@@ -3,6 +3,7 @@ import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 
 import AuthRouter from './router/auth.router.js';
+import ProblemRouter from './router/problem.router.js';
 
 const app = express();
 
@@ -14,5 +15,7 @@ app.get('/ping', (req, res) => {
 });
 
 app.use('/auth', AuthRouter);
+
+app.use('/problem', ProblemRouter);
 
 export default app;
