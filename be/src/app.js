@@ -13,7 +13,7 @@ const app = express();
 
 app.use(
 	cors({
-		origin: "http://localhost:5173", // Or "*" for all origins (not recommended for production)
+		origin: 'http://localhost:5173', // Or "*" for all origins (not recommended for production)
 		methods: ['GET', 'POST', 'OPTIONS'],
 		credentials: true,
 	})
@@ -36,8 +36,6 @@ app.use('/api/v1/execute-code', executionRoutes);
 app.use('./api/v1/submission', submissionRoutes);
 
 app.use('/api/v1/playlist', playlistRoutes);
-
-const SELF_URL = process.env.SELF_URL;
 
 const PORT = parseInt(process.env.PORT, 10);
 

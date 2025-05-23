@@ -6,7 +6,6 @@ const PORT = parseInt(process.env.PORT, 10);
 
 const server = http.createServer(app);
 
-
 const SELF_URL = process.env.SELF_URL || 'http://localhost';
 server.listen(PORT, () => {
 	console.log(`Server running at ${SELF_URL}:${PORT}`);
