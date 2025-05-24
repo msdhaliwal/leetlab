@@ -1,10 +1,11 @@
+import { UserRole } from '../generated/prisma/index.js';
 import { db } from '../libs/db.js';
 import { getJudge0LanguageId, pollBatchResults, submitBatch } from '../libs/judge0.lib.js';
 
 export const createProblem = async (req, res) => {
 	try {
 		const { title, description, difficulty, tags, input, output, constraints, examples, testCases, codeSnippets, referenceSolutions } = req.body;
-		if (req.user.role !== 'ADMIN') {
+		if (req.user.role !== UserRole.ADMIN) {
 			throw { status: 403, message: `You are not authorized to create a problem` };
 		}
 		for (const [language, solutionCode] of Object.entries(referenceSolutions)) {
@@ -71,7 +72,7 @@ export const getProblemById = async (req, res) => {
 export const updateProblemById = async (req, res) => {
 	try {
 		const { title, description, difficulty, tags, input, output, constraints, examples, testCases, codeSnippets, referenceSolutions } = req.body;
-		if (req.user.role !== 'ADMIN') {
+		if (req.user.role !== UserRole.ADMIN) {
 			throw { status: 403, message: `You are not authorized to create a problem` };
 		}
 		for (const [language, solutionCode] of Object.entries(referenceSolutions)) {
