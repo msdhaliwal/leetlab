@@ -1,7 +1,8 @@
 import bcrypt from 'bcryptjs';
-import { db } from '../libs/db.js';
+import { db } from '../middleware/prisma.js';
 import { UserRole } from '../generated/prisma/index.js';
 import jwt from 'jsonwebtoken';
+import { HashText, IsSameHash } from '../utils/index.js';
 
 export const register = async (req, res) => {
 	try {
@@ -10,8 +11,7 @@ export const register = async (req, res) => {
 		if (userExists) {
 			throw { status: 429, message: `User already exists` };
 		}
-		const hashedPassword = await bcrypt.hash(password, 10);
-		const newUser = await db.user.create({ data: { email, password: hashedPassword, name, role: UserRole.USER } });
+		const newUser = await db.user.create({ data: { email, password, name, role: UserRole.USER } });
 		const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 		res.cookie('jwt', token, {
 			httpOnly: true,
@@ -31,11 +31,11 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
 	try {
 		const { email, password } = req.body;
-		const user = await db.user.findUnique({ where: { email } });
+		const user = await db.user.findUnique({ where: { email: HashText(email) } });
 		if (!user) {
 			throw { status: 401, message: `Invalid credentials` };
 		}
-		const isPasswordValid = await bcrypt.compare(password, user.password);
+		const isPasswordValid = IsSameHash(password, user.password);
 		if (!isPasswordValid) {
 			throw { status: 401, message: `Invalid credentials` };
 		}

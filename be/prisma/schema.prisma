@@ -1,12 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
@@ -27,12 +21,13 @@ enum Difficulty {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  name     String?
-  email    String   @unique
-  image    String?
-  role     UserRole @default(USER)
-  password String
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  email_enc String
+  image     String?
+  role      UserRole @default(USER)
+  password  String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -41,7 +36,7 @@ model User {
   problems      Problem[] // single User can have many Problem entries
   submissions   Submission[] // single User can have many Submission entries
   problemSolved ProblemSolved[] // single User can have many ProblemSolved entries
-  playlists      Playlist[]  
+  playlists     Playlist[]
 }
 
 model Problem {
@@ -64,9 +59,9 @@ model Problem {
   updatedAt DateTime @updatedAt
 
   // relationship
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  submissions Submission[]
-  solvedBy    ProblemSolved[]
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions      Submission[]
+  solvedBy         ProblemSolved[]
   problemPlaylists ProblemInPlaylist[]
 }
 
@@ -146,7 +141,7 @@ model Playlist {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([name, userId])      // unique playlist names per user
+  @@unique([name, userId]) // unique playlist names per user
 }
 
 model ProblemInPlaylist {
@@ -157,8 +152,8 @@ model ProblemInPlaylist {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  playlist  Playlist @relation(fields: [playlistId] , references: [id] , onDelete: Cascade)
-  problem Problem @relation(fields: [problemId] , references: [id] , onDelete: Cascade)
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  problem  Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
   @@unique([playlistId, problemId])
 }
