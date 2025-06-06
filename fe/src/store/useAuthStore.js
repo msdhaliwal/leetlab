@@ -1,20 +1,19 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios.js';
 import toast from 'react-hot-toast';
-const API_HOST = import.meta.env.VITE_API_HOST;
 
 export const useAuthStore = create(set => ({
   authUser: null,
   isSigninUp: false,
   isLoggingIn: false,
   isCheckingAuth: true,
+  isGoogleLoading: false,
 
   checkAuth: async () => {
     set({ isCheckingAuth: true });
 
     try {
       const res = await axiosInstance.get('/auth/check');
-      console.log('Auth response', res.data);
       set({ authUser: res.data.user });
     } catch (error) {
       console.log('Error checking auth: ', error);
@@ -46,7 +45,19 @@ export const useAuthStore = create(set => ({
       toast.success(res.data.user.message);
     } catch (error) {
       console.log('Error logging in', error);
-      toast.error('Error logging in');
+    } finally {
+      set({ isLoggingIn: false });
+    }
+  },
+
+  loginGoogle: async data => {
+    set({ isLoggingIn: true });
+    try {
+      const res = await axiosInstance.post('/auth/google/callback', data);
+      set({ authUser: res.data.user });
+      toast.success(res.data.user.message);
+    } catch (error) {
+      console.log('Error logging in', error);
     } finally {
       set({ isLoggingIn: false });
     }

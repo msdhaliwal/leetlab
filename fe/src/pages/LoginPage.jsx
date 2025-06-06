@@ -6,6 +6,7 @@ import { Code, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
 import { z } from 'zod';
 import AuthImagePattern from '../components/AuthImagePattern';
 import { useAuthStore } from '../store/useAuthStore';
+import { getGoogleRedirectUrl } from '../lib/apis';
 
 const LoginSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -33,6 +34,9 @@ const LoginPage = () => {
       console.error('Login failed: ', error);
     }
   };
+  const authHandler = async () => {
+    getGoogleRedirectUrl();
+  }
 
   return (
     <div className="flex h-screen w-full">
@@ -95,7 +99,7 @@ const LoginPage = () => {
           </form>
 
           <div className="mt-6">
-            <button type="button" className="btn btn-outline w-full flex items-center justify-center gap-2">
+            <button type="button" className="btn btn-outline w-full flex items-center justify-center gap-2"  onClick={authHandler}>
               <img
                 src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
                 alt="Google"

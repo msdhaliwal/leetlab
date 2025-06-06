@@ -14,6 +14,7 @@ import ProfilePage from './pages/ProfilePage';
 import { useAuthStore } from './store/useAuthStore';
 import Layout from './layout/Layout';
 import AdminRoute from './components/AdminRoute';
+import GoogleAuthCallback from './pages/GoogleAuthCallback';
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -37,10 +38,14 @@ function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={authUser ? <HomePage /> : <Navigate to={'/login'} />} />
         </Route>
-
         <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to={'/'} />} />
         <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to={'/'} />} />
 
+
+        <Route
+          path="/auth/redirect"
+          element={!authUser ? <GoogleAuthCallback /> : <Navigate to={'/'} />}
+        />
         <Route
           path="/problem/:id"
           element={authUser ? <ProblemPage /> : <Navigate to={'/login'} />}
@@ -52,6 +57,7 @@ function App() {
         <Route element={<AdminRoute />}>
           <Route path="/add-problem" element={authUser ? <AddProblem /> : <Navigate to="/" />} />
         </Route>
+
       </Routes>
     </div>
   );
