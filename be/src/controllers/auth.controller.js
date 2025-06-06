@@ -36,6 +36,10 @@ export const login = async (req, res) => {
 		if (!user) {
 			throw { status: 401, message: `Invalid credentials` };
 		}
+		if (user.login_type !== LoginType.EMAIL_PASSWORD) {
+			/* if user exists and is not email & password */
+			throw { status: 400, message: `Account is not email & password` };
+		}
 		const isPasswordValid = IsSameHash(password, user.password);
 		if (!isPasswordValid) {
 			throw { status: 401, message: `Invalid credentials` };
@@ -140,7 +144,15 @@ export async function getGoogleAuthCallback(req, res) {
 		const { id_token } = tokenResponse.data;
 		const userInfo = jwt.decode(id_token);
 		let { email, name } = userInfo;
-		const newUser = await db.user.create({ data: { email, password: null, name, role: UserRole.USER, login_type: LoginType.GOOGLE } });
+		let user = await db.user.findUnique({ where: { email: HashText(email) } });
+		if (!user) {
+			user = await db.user.create({ data: { email, password: null, name, role: UserRole.USER, login_type: LoginType.GOOGLE } });
+		} else {
+			if (user.login_type !== LoginType.GOOGLE) {
+				/* if user exists and is email & password */
+				throw { status: 400, message: `Use email/password to login` };
+			}
+		}
 		const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 		res.cookie('jwt', token, {
 			httpOnly: true,
