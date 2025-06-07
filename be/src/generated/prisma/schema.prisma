@@ -1,0 +1,164 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum LoginType {
+  GOOGLE
+  EMAIL_PASSWORD
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+model User {
+  id         String    @id @default(uuid())
+  name       String?
+  email      String    @unique
+  email_enc  String
+  image      String?
+  role       UserRole  @default(USER)
+  login_type LoginType @default(EMAIL_PASSWORD)
+  password   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  // reverse relation
+  problems      Problem[] // single User can have many Problem entries
+  submissions   Submission[] // single User can have many Submission entries
+  problemSolved ProblemSolved[] // single User can have many ProblemSolved entries
+  playlists     Playlist[]
+}
+
+model Problem {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  difficulty  Difficulty
+  tags        String[]
+  userId      String
+  examples    Json
+  constraints String
+  hints       String?
+  editorial   String?
+
+  testCases          Json
+  codeSnippets       Json
+  referenceSolutions Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions      Submission[]
+  solvedBy         ProblemSolved[]
+  problemPlaylists ProblemInPlaylist[]
+}
+
+// it is for storing overall test case results
+// for each submission, there can be multiple test cases
+model Submission {
+  id            String  @id @default(uuid())
+  userId        String
+  problemId     String
+  sourceCode    Json
+  language      String
+  stdin         String?
+  stdout        String?
+  stderr        String?
+  compileOutput String?
+  status        String // Accepted , wrong answer
+  memory        String?
+  time          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  testCases TestCaseResult[]
+}
+
+// it is for storing the result of each test case (eg. test case 1, test case 2, etc)
+model TestCaseResult {
+  id            String  @id @default(uuid())
+  submissionId  String
+  testCase      Int
+  passed        Boolean
+  stdout        String?
+  expected      String
+  stderr        String?
+  compileOutput String?
+  status        String
+  memory        String?
+  time          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  submission Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}
+
+model ProblemSolved {
+  id        String @id @default(uuid())
+  userId    String
+  problemId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relationship
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId])
+}
+
+model Playlist {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+
+  problems ProblemInPlaylist[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([name, userId]) // unique playlist names per user
+}
+
+model ProblemInPlaylist {
+  id         String @id @default(uuid())
+  problemId  String
+  playlistId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  problem  Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, problemId])
+}
