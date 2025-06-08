@@ -10,14 +10,18 @@ import submissionRoutes from './routes/submission.routes.js';
 import playlistRoutes from './routes/playlist.routes.js';
 
 const app = express();
-
-app.use(
-	cors({
-		origin: 'http://localhost:5173', // Or "*" for all origins (not recommended for production)
-		methods: ['GET', 'POST', 'OPTIONS'],
-		credentials: true,
-	})
-);
+/* cors handler */
+const ALLOWED_URL_FOR_CORS = process.env.ALLOWED_URL_FOR_CORS;
+const allowedOrigins = ALLOWED_URL_FOR_CORS ? ALLOWED_URL_FOR_CORS.split(',') : [];
+if (Array.isArray(allowedOrigins)) {
+	app.use(
+		cors({
+			origin: allowedOrigins,
+			methods: ['GET', 'POST', 'OPTIONS'],
+			credentials: true,
+		})
+	);
+}
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
